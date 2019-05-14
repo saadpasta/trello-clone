@@ -9,7 +9,12 @@ class App extends Component {
     this.state = {
       div1: ["1", "2", "3", "4"],
       div2: ["5", "6", "7", "8"],
-      div3:["9","10","11","12"],
+      div3: ["9", "10", "11", "12"],
+      tables: {
+        div1: ["1", "2", "3", "4"],
+        div2: ["5", "6", "7", "8"],
+        div3: ["9", "10", "11", "12"]
+      },
       picked_parentElement: "",
       indexNumber: ""
     };
@@ -18,14 +23,12 @@ class App extends Component {
   allowDrop = ev => {
     ev.preventDefault();
     ev.target.style.marginBottom = "50px";
-
   };
 
   dragleave = ev => {
     ev.target.style.border = "";
     ev.target.style.marginBottom = "0px";
     this.flag = true;
-
   };
 
   drag = ev => {
@@ -46,19 +49,27 @@ class App extends Component {
     const picked_parentElemet = this.state.picked_parentElement;
     ev.target.style.border = "";
 
-         ev.target.style.marginBottom = "0px";
-     
+    ev.target.style.marginBottom = "0px";
 
+    if (drop_parentElement != "" && drop_parentElement != undefined) {
+      const array1 = this.state[drop_parentElement];
+      const indexNumber = array1.indexOf(ev.target.innerHTML);
+      var array = [...array1];
+      array.splice(indexNumber + 1, 0, content);
+      this.setState({
+        [drop_parentElement]: array
+      });
+      console.log(array);
 
-    const array1 = this.state[drop_parentElement];
-    const indexNumber = array1.indexOf(ev.target.innerHTML);
-    var array = [...array1];
-    array.splice(indexNumber + 1, 0, content);
-    this.setState({
-      [drop_parentElement]: array
-    });
-    console.log(array);
-
+      /*       const array1 = this.state.tables;
+      const indexNumber = array1[drop_parentElement].indexOf(ev.target.innerHTML);
+      var array = [...array1];
+      array.splice(indexNumber + 1, 0, content);
+      this.setState({
+        [drop_parentElement]: array
+      });
+      console.log(array); */
+    }
     if (this.state.picked_parentElement == drop_parentElement) {
       console.log(1);
       const dropArray = this.state[drop_parentElement];
@@ -76,144 +87,102 @@ class App extends Component {
     }
 
     if (this.state.picked_parentElement != drop_parentElement) {
-
       const dropArray1 = this.state[picked_parentElemet];
       var array = dropArray1;
-      console.log("=====>",array);
-      
+      console.log("=====>", array);
+
       const indexNumber = array.indexOf(content);
-      console.log(content)
+      console.log(content);
       console.log(indexNumber);
       if (indexNumber !== -1) {
         array.splice(indexNumber, 1);
         this.setState({ [picked_parentElemet]: array });
       }
-      console.log(array)
+      console.log(array);
     }
   };
 
+  addCard = ev => {
+    console.log(ev.target.parentElement.id);
+    const id = ev.target.parentElement.id;
+    let table = this.state.tables;
+    table[id].push("Sample Card");
+    this.setState({ tables: table });
+  };
+
+  addnewTable = () => {
+    var id = prompt("Please enter your Table Id");
+    let { tables } = this.state;
+    tables[id] = ["Sample", "Sample", "Sample"];
+    this.setState({
+      tables
+    });
+  };
+
   render() {
+    const { tables } = this.state;
+    const tableValues = Object.values(tables);
     return (
       <div className="App">
-        <div
-          class="card"
-          style={{
-            width: "18rem",
-            marginLeft: "50px",
-            marginTop: "55px",
-            display: "inline-block"
-          }}
-          onDrop={this.drop}
-          onDragOver={this.allowDrop}
-          onDragLeave={this.dragleave}
-          id="div1"
-        >
-          <div class="card-body">
-            <h5 class="card-title">Task Completed</h5>
-          </div>
-          <ul
-            class="list-group list-group-flush"
-            onDrop={this.drop}
-            onDragOver={this.allowDrop}
-            onDragLeave={this.dragleave}
-            id="div1"
-          >
-            {this.state.div1.map((v, i) => {
-              return (
-                <li
-                  class="list-group-item"
-                  style={{ cursor: "pointer" }}
-                  draggable="true"
-                  onDragStart={this.drag}
-                  id={v}
+        {Object.keys(tables).map((u, r) => {
+          return (
+            <div
+              className="card"
+              style={{
+                width: "18rem",
+                marginLeft: "50px",
+                marginTop: "55px",
+                display: "inline-block"
+              }}
+              onDrop={this.drop}
+              onDragOver={this.allowDrop}
+              onDragLeave={this.dragleave}
+              id={u}
+            >
+              <div className="card-body">
+                <h5 className="card-title">Task Completed</h5>
+              </div>
+              <ul
+                className="list-group list-group-flush"
+                onDrop={this.drop}
+                onDragOver={this.allowDrop}
+                onDragLeave={this.dragleave}
+                id={u}
+              >
+                {tableValues[r].map((v, i) => {
+                  return (
+                    <li
+                      className="list-group-item"
+                      style={{ cursor: "pointer" }}
+                      draggable="true"
+                      onDragStart={this.drag}
+                      id={v}
+                    >
+                      {v}
+                    </li>
+                  );
+                })}
+                <button
+                  type="button"
+                  class="btn btn-outline-success"
+                  style={{ margin: 20 }}
+                  onClick={event => this.addCard(event)}
                 >
-                  {v}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        <div
-          class="card"
-          style={{
-            width: "18rem",
-            marginLeft: "50px",
-            marginTop: "55px",
-            display: "inline-block"
-          }}
-          onDrop={this.drop}
-          onDragOver={this.allowDrop}
-          onDragLeave={this.dragleave}
-          id="div2"
+                  Add Card
+                </button>
+              </ul>
+            </div>
+          );
+        })}
+        <br />
+        <br />
+        <button
+          type="button"
+          className="btn btn-info"
+          onClick={this.addnewTable}
         >
-          <div class="card-body">
-            <h5 class="card-title">Task in Progress</h5>
-          </div>
-          <ul
-            class="list-group list-group-flush"
-            onDrop={this.drop}
-            onDragOver={this.allowDrop}
-            onDragLeave={this.dragleave}
-            id="div2"
-          >
-            {this.state.div2.map((v, i) => {
-              return (
-                <li
-                  class="list-group-item"
-                  style={{ cursor: "pointer" }}
-                  draggable="true"
-                  onDragStart={this.drag}
-                  id={v}
-                >
-                  {v}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <div
-          class="card"
-          style={{
-            width: "18rem",
-            marginLeft: "50px",
-            marginTop: "55px",
-            display: "inline-block"
-          }}
-          onDrop={this.drop}
-          onDragOver={this.allowDrop}
-          onDragLeave={this.dragleave}
-          id="div3"
-        >
-          <div class="card-body">
-            <h5 class="card-title">Task in Started</h5>
-          </div>
-          <ul
-            class="list-group list-group-flush"
-            onDrop={this.drop}
-            onDragOver={this.allowDrop}
-            onDragLeave={this.dragleave}
-            id="div3"
-          >
-            {this.state.div3.map((v, i) => {
-              return (
-                <li
-                  class="list-group-item"
-                  style={{ cursor: "pointer" }}
-                  draggable="true"
-                  onDragStart={this.drag}
-                  id={v}
-                >
-                  {v}
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-        <br></br>
-        <br></br>
-        <button type="button" class="btn btn-info">Add New Table</button>
-
+          Add New Table
+        </button>
       </div>
     );
   }
