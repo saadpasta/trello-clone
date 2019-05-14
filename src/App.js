@@ -7,13 +7,19 @@ class App extends Component {
     super(props);
     this.flag = true;
     this.state = {
-      div1: ["1", "2", "3", "4"],
-      div2: ["5", "6", "7", "8"],
-      div3: ["9", "10", "11", "12"],
       tables: {
-        div1: ["1", "2", "3", "4"],
-        div2: ["5", "6", "7", "8"],
-        div3: ["9", "10", "11", "12"]
+        div1: [
+          { title: "Software Enginner", description: "Hello This is Me" },
+          { title: "Mechanic", description: "1234" }
+        ],
+        div2: [
+          { title: "Web Developer", description: "Hello This is Me" },
+          { title: "Rider", description: "1234" }
+        ],
+        div3: [
+          { title: "Data Enginner", description: "Hello This is Me" },
+          { title: "Youtuber", description: "1234" }
+        ]
       },
       picked_parentElement: "",
       indexNumber: ""
@@ -33,87 +39,80 @@ class App extends Component {
 
   drag = ev => {
     ev.dataTransfer.setData("text", ev.target.id);
-    console.log("saad", ev.target.parentElement.id);
     this.setState({
       picked_parentElement: ev.target.parentElement.id,
-      picked_element: ev.target.innerHTML
+      picked_element: ev.target.id
     });
   };
 
   drop = ev => {
     ev.preventDefault();
     var data = ev.dataTransfer.getData("text");
-    var content = document.getElementById(data).innerHTML;
-    var id = document.getElementById(data).id;
     const drop_parentElement = ev.target.parentElement.id;
     const picked_parentElemet = this.state.picked_parentElement;
+    const pickedElementid = this.state.picked_element;
     ev.target.style.border = "";
-
     ev.target.style.marginBottom = "0px";
+    const pickedElement = this.state.tables[picked_parentElemet][
+      pickedElementid
+    ];
 
-    if (drop_parentElement != "" && drop_parentElement != undefined) {
-      const array1 = this.state[drop_parentElement];
-      const indexNumber = array1.indexOf(ev.target.innerHTML);
-      var array = [...array1];
-      array.splice(indexNumber + 1, 0, content);
+    /* Drop On Different Table  */
+    if (
+      drop_parentElement != "" &&
+      drop_parentElement != undefined &&
+      this.state.picked_parentElement != drop_parentElement
+    ) {
+      const array1 = this.state.tables[drop_parentElement];
+      const indexNumber = ev.target.id;
+      array1.splice(indexNumber + 1, 0, pickedElement);
       this.setState({
-        [drop_parentElement]: array
-      });
-      console.log(array);
-
-      /*       const array1 = this.state.tables;
-      const indexNumber = array1[drop_parentElement].indexOf(ev.target.innerHTML);
-      var array = [...array1];
-      array.splice(indexNumber + 1, 0, content);
-      this.setState({
-        [drop_parentElement]: array
-      });
-      console.log(array); */
-    }
-    if (this.state.picked_parentElement == drop_parentElement) {
-      console.log(1);
-      const dropArray = this.state[drop_parentElement];
-      var array = [...dropArray];
-      const target_indexNumber = array.indexOf(ev.target.innerHTML);
-      const picked_indexNumber = array.indexOf(this.state.picked_element);
-      var element = array[picked_indexNumber];
-      array.splice(picked_indexNumber, 1);
-      array.splice(target_indexNumber, 0, element);
-
-      console.log(array);
-      this.setState({
-        [drop_parentElement]: array
+        [drop_parentElement]: array1
       });
     }
 
     if (this.state.picked_parentElement != drop_parentElement) {
-      const dropArray1 = this.state[picked_parentElemet];
-      var array = dropArray1;
-      console.log("=====>", array);
-
-      const indexNumber = array.indexOf(content);
-      console.log(content);
-      console.log(indexNumber);
+      const dropArray1 = this.state.tables[picked_parentElemet];
+      const indexNumber = pickedElementid;
       if (indexNumber !== -1) {
-        array.splice(indexNumber, 1);
-        this.setState({ [picked_parentElemet]: array });
+        dropArray1.splice(indexNumber, 1);
+        this.setState({ [picked_parentElemet]: dropArray1 });
       }
-      console.log(array);
     }
+    /* Drop On Different Table  */
+
+
+    /* Drop on same table */
+    if (this.state.picked_parentElement == drop_parentElement) {
+      const dropArray = this.state.tables[drop_parentElement];
+      const target_indexNumber = ev.target.id;
+      const picked_indexNumber = pickedElementid;
+      var element = pickedElement;
+      dropArray.splice(picked_indexNumber, 1);
+      dropArray.splice(target_indexNumber, 0, element);
+
+      this.setState({
+        [drop_parentElement]: dropArray
+      });
+    }
+    /* Drop on same table */
   };
 
   addCard = ev => {
     console.log(ev.target.parentElement.id);
     const id = ev.target.parentElement.id;
     let table = this.state.tables;
-    table[id].push("Sample Card");
+    table[id].push({ title: "Sample Job", description: "Hello This is Me" });
     this.setState({ tables: table });
   };
 
   addnewTable = () => {
     var id = prompt("Please enter your Table Id");
     let { tables } = this.state;
-    tables[id] = ["Sample", "Sample", "Sample"];
+    tables[id] = [
+      { title: "Sample Job", description: "Hello This is Me" },
+      { title: "Sample Job", description: "1234" }
+    ];
     this.setState({
       tables
     });
@@ -138,17 +137,12 @@ class App extends Component {
               onDragOver={this.allowDrop}
               onDragLeave={this.dragleave}
               id={u}
+              key={r}
             >
               <div className="card-body">
                 <h5 className="card-title">Task Completed</h5>
               </div>
-              <ul
-                className="list-group list-group-flush"
-                onDrop={this.drop}
-                onDragOver={this.allowDrop}
-                onDragLeave={this.dragleave}
-                id={u}
-              >
+              <ul className="list-group list-group-flush" id={u}>
                 {tableValues[r].map((v, i) => {
                   return (
                     <li
@@ -156,15 +150,16 @@ class App extends Component {
                       style={{ cursor: "pointer" }}
                       draggable="true"
                       onDragStart={this.drag}
-                      id={v}
+                      id={i}
+                      key={i}
                     >
-                      {v}
+                      {v.title}
                     </li>
                   );
                 })}
                 <button
                   type="button"
-                  class="btn btn-outline-success"
+                  className="btn btn-outline-success"
                   style={{ margin: 20 }}
                   onClick={event => this.addCard(event)}
                 >
